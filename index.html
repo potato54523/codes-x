@@ -58,7 +58,7 @@ body{
 <body>
 <p class="window1" > </p>
 <p class="top_window"> </p>
-<p class="title-1" draggable="false">QingYun</p>
+<button onclick="window.location.href='index.html'" class="title-1" draggable="false">QingYun</button>
 <p class="message-1" draggable="false"></p>
 <p class="top-1"></p>
 <!-- 首页图标 -->
@@ -77,6 +77,8 @@ body{
 <div-b class="assets-b1"></div-b>
 <div-c class="assets-b2"></div-c>
 <div-d class="assets-b3"></div-d>
+<input type="search" class="search-input" placeholder="搜索内容">
+<div-a1 id="timeText"></div-a1>
 </body>
 <script src="bin/css/index/loading.js"></script>
 <script src="bin/css/index/lianyi.js"></script>
@@ -86,3 +88,17 @@ body{
 <p class="assets1-t" >功能</p>
 <a class="assets-to" href="assets.html">更多产品</a>
 </body>
+<script>
+    let hour = new Date().getHours();
+    if (hour < 5 && hour >= 0) {
+        hour = "凌晨好";
+    } else if (hour < 12 && hour >= 5) {
+        hour = "上午好";
+    } else if (hour < 18 && hour >= 12) {
+        hour = "下午好";
+    } else if (hour < 24 && hour >= 18) {
+        hour = "晚上好";
+    }
+    document.querySelector("#timeText").innerText = hour;
+
+</script>
