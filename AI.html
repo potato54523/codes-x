@@ -16,8 +16,8 @@ body{padding:12px;}
 <button id="send">发送</button>
 
 <script>
-const WORKER_URL = "https://qingyunshequ.pages.dev";
-const systemPrompt = `你是网站客服，只回答本站相关，不知道就说暂时无法解答。`;
+const WORKER_URL = "/api/chat";
+const systemPrompt = `你要回答中文问题，回答时不要包含任何英文。`;
 
 const out = document.querySelector('#out');
 const inp = document.querySelector('#inp');
