@@ -23,7 +23,25 @@
   color:#000000;
   border-radius:10px;
   box-shadow:3px 3px 20px -10px;
-  margin-top:550px;
+  margin-top:750px;
+  z-index: 3;
+     position: absolute;
+}
+.lianyi-btn1 {
+    background-color: #4f7cf6;
+    height: 40px;
+    width: 150px;
+    border-radius:7px;
+    margin-left: 260px;
+    border: none;
+    outline: none;
+  position: relative;
+  overflow: hidden;
+  border: none;
+  color:#000000;
+  border-radius:10px;
+  box-shadow:3px 3px 20px -10px;
+  margin-top:750px;
   z-index: 3;
      position: absolute;
 }
