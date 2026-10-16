@@ -95,7 +95,9 @@ body{
         hour = "凌晨好";
     } else if (hour < 12 && hour >= 5) {
         hour = "上午好";
-    } else if (hour < 18 && hour >= 12) {
+    } else if (hour < 14 && hour >= 12) {
+        hour = "中午好";
+    } else if (hour < 18 && hour >= 14) {
         hour = "下午好";
     } else if (hour < 24 && hour >= 18) {
         hour = "晚上好";
