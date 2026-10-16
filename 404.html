@@ -21,9 +21,9 @@ body{
 .A404{
     position: absolute;
     left: 50%;
-    top: 40%;
+    margin-top: 40px;
     transform: translate(-50%, -50%);
-    font-size: 10rem;
+    font-size: 5rem;
     color: #000000;
     -webkit-user-select: none;
   -moz-user-select: none;
@@ -34,7 +34,7 @@ body{
 .A404-text{
     position: absolute;
     left: 50%;
-    top: 60%;
+    margin-top: 100px;
     transform: translate(-50%, -50%);
     font-size: 2rem;
     color: #000000;
@@ -44,12 +44,34 @@ body{
   user-select: none;
   -webkit-touch-callout: none;
 }   
-
+.back{
+    background-color: #ffffff;
+    height: 40px;
+    width: 150px;
+    border-radius:7px;
+    margin-left: 10px;
+    border: none;
+    outline: none;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #e2e2e2;
+  color:#000000;
+  margin-top:2px;
+  z-index: 1;
+     position: absolute;
+     cursor: pointer;
+}
+.back:hover{
+    background-color:#f3f3f3;
+    color:#000000;
+    transition: all 0.3s;
+}
 </style>
 </head>
 
 <body>
 <div-a class="A404">404</div-a>
 <div-b class="A404-text">NOT FOUND</div-b>
+<button class="back" onclick="window.history.back()">返回上一页</button>
 </body>
 <script src="bin/css/index/lianyi.js"></script>
