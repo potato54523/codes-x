@@ -12,6 +12,36 @@
     user-select: none;
     -webkit-touch-callout: none;
 }
+
+.use{
+    background-color: #ffffff;
+    height: 30px;
+    width: 70px;
+    border-radius:7px;
+    margin-top:60px; 
+    margin-left: 10px;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #e2e2e2;
+    color:#000000;
+    z-index: 1;
+    position: absolute;
+    cursor: pointer;
+}
+.use:hover{
+    background-color:#f3f3f3;
+    color:#000000;
+    transition: all 0.3s;
+}
+.u-a{
+    margin-top:60px; 
+    margin-left: 10px;
+}
+.u-b{
+    margin-top:60px; 
+    margin-left:90px;
+}
 .search-input{
     position: absolute;
     z-index: 2;
