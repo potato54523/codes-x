@@ -121,10 +121,10 @@
 .window-2{
     position: absolute;
     z-index: 2;
-    margin-left: 5vw;
+    margin-left: 3vw;
     margin-top: 620px;
-    width: 500px;
-    height: 200px;
+    width: 47vw;
+    height: 400px;
     background-color: #ffffff;
     border-radius:10px;
     border: 1px solid #e2e2e2;
@@ -175,7 +175,7 @@
     margin-left: 5vw;
     margin-top: 890px;
     width: 90vw;
-    height: 200px;
+    height: 400px;
     background-color: #ffffff;
     border-radius:10px;
     border: 1px solid #e2e2e2;

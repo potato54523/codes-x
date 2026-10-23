@@ -1,0 +1,32 @@
+.glass-btn {
+  margin-top: 10px;
+  margin-left: 20px;
+  position: absolute;
+  width: 180px; height: 70px;
+  border-radius: 44px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font: 600px 20px -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: 1px;
+  cursor: default;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  font-size:20px;
+  z-index: 10;
+
+}
+.glass-top1{
+    margin-top: 10px;
+    margin-left: 200px;
+    position: absolute;
+    width: 180px; height: 70px;
+    border-radius: 44px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font: 600px 20px -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: 1px;
+    cursor: default;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    font-size:20px;
+    z-index: 10;
+
+}
