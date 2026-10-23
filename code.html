@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<link rel="stylesheet" href="bin/css/index/loading.css">
+<title>Liquid Glass - 开发者板块</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; height: 100%;
+  background: #fff; overflow: hidden;
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+#root {
+  position: relative; width: 100vw; height: 100vh;
+  background: #fff; overflow: hidden;
+}
+.bg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+.glass-btn {
+  position: absolute;
+  border-radius: 44px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font: 600 20px -apple-system, sans-serif;
+  cursor: default; touch-action: none;
+  z-index: 10;
+  background: rgba(255,255,255,0.25);
+  border: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.glass-btn-1 { left:10px; top: 10px;  width: 150px; height: 60px;}
+.glass-btn-2 { left:170px; top: 10px;   width: 80vw; height: 60px;}
+.win1 { left: 10px; top:100px; width: 45vw; height: 30vw;}
+.win2 { left: 50vw; top:100px; width: 45vw; height:30vw;}
+.winx { left: 10px; top:500px; width: 93vw; height:6vw;}
+</style>
+</head>
+<body>
+
+<div id="root">
+  <img class="bg" crossorigin="anonymous" draggable="false" src="assets/textures/png/index/z.png" alt="">
+
+  <div class="glass-btn glass-btn-1"  onclick="window.history.back()"
+       data-config='{"refraction":0.36,"cornerRadius":44,"Z-Radius":45,"blurAmount":0.02,"chromAberration":0,"edgeHighlight":0.25,"specular":0,"fresnel":0.8,"tintStrength":0.02,"opacity":1,"button":true,"floating":false}'>
+    返回
+  </div>
+
+  <div class="glass-btn glass-btn-2"
+       data-config='{"refraction":0.36,"cornerRadius":44,"Z-Radius":45,"blurAmount":0.02,"chromAberration":0,"edgeHighlight":0.25,"specular":0,"fresnel":0.8,"tintStrength":0.02,"opacity":1,"floating":false}'>
+    开发者模块
+  </div>
+    <div class="glass-btn win1"
+       data-config='{"refraction":0.36,"cornerRadius":44,"Z-Radius":45,"blurAmount":0.02,"chromAberration":0,"edgeHighlight":0.25,"specular":0,"fresnel":0.8,"tintStrength":0.02,"opacity":1,"floating":false}'>
+      
+      </div>
+    <div class="glass-btn win2"
+     data-config='{"refraction":0.36,"cornerRadius":44,"Z-Radius":45,"blurAmount":0.02,"chromAberration":0,"edgeHighlight":0.25,"specular":0,"fresnel":0.8,"tintStrength":0.02,"opacity":1,"floating":false}'>
+    
+    </div>
+    <div class="glass-btn winx"
+     data-config='{"refraction":0.36,"cornerRadius":44,"Z-Radius":45,"blurAmount":0.02,"chromAberration":0,"edgeHighlight":0.25,"specular":0,"fresnel":0.8,"tintStrength":0.02,"opacity":1,"floating":false}'>
+    
+    </div>
+
+
+</div>
+<div class="loading-overlay" id="loadingOverlay">
+    <svg class="loader" viewBox="0 0 50 50">
+      <circle cx="25" cy="25" r="20" />
+    </svg>
+    <p class="loading-text">渲染...</p>
+  </div>
+<script type="module" src="bin/css/code/code.js"></script>
+<script src="bin/css/index/loading.js"></script>
+</html>
