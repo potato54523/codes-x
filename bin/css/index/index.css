@@ -1,3 +1,33 @@
+.top_window{
+    font-size:15px;
+    position: absolute;
+    left:50%;
+    transform: translateX(-50%);
+    background-color:#fbfbfb;
+    height:60px;
+    width:100vw;
+    box-shadow:10px 10px 50px -30px;
+    z-index: 1;
+    -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  margin-top: -5px;
+  border-bottom:1px solid #b3b3b3;
+}
+.title-1{
+    cursor: pointer;
+    user-select: none;
+  -webkit-touch-callout: none;
+  }
+  .a{
+    position: absolute;
+    margin-left: 10px;
+    margin-top: 190px;
+   z-index: 3;
+    color: #000000;
+  }
 #timeText{
     position: absolute;
     z-index: 2;
@@ -12,7 +42,24 @@
     user-select: none;
     -webkit-touch-callout: none;
 }
-
+.github-icon{
+    position: absolute;
+    margin-top:65px;
+    margin-left:95px;
+    z-index: 2;
+}
+.cloudflare-icon{
+    position: absolute;
+    margin-top:65px;
+    margin-left:15px;
+    z-index: 2;
+}
+.filemv-icon{
+    position: absolute;
+    margin-top:65px;
+    margin-left:175px;
+    z-index: 2;
+}
 .use{
     background-color: #ffffff;
     height: 30px;
@@ -41,6 +88,10 @@
 .u-b{
     margin-top:60px; 
     margin-left:90px;
+}
+.u-c{
+    margin-top:60px; 
+    margin-left:170px;
 }
 .search-input{
     position: absolute;

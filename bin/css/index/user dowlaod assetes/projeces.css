@@ -1,0 +1,32 @@
+.download-a{
+    margin-top: 485px;
+    margin-left: 20vw;
+    background-color: #4f7cf6;
+    color: #000;
+    z-index: 3;
+    height: 40px;
+    width: 80px;
+    border-radius:7px;
+    border: none;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+    border: none;
+    color:#000000;
+    border-radius:10px;
+    box-shadow:3px 3px 20px -10px;
+    z-index: 3;
+    position: absolute;
+}
+.download-a:hover{
+    background-color:#4a76f0;
+    transition: all 0.3s;
+}
+.png-a{
+    position: absolute;
+    margin-top: 460px;
+    margin-left: 10vw;
+    z-index: 10;
+    font-size: 15px;
+    color: #000;
+}
