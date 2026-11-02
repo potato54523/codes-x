@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>system.log — /var/log/secure</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{
+    margin:0;padding:0;height:100%;
+    background:#000;overflow:hidden;
+  }
+  body{
+    font-family:Consolas,"Courier New",Menlo,monospace;
+    font-size:14px;
+    color:#fff;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  #app{
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    display:flex;
+    flex-direction:column;
+    padding:12px 16px;
+    background:#000;
+  }
+
+  /* 顶栏 */
+  #bar{
+    flex:none;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-bottom:8px;
+    border-bottom:1px solid #2a2a2a;
+    font-size:12px;
+    color:#777;
+    letter-spacing:1px;
+  }
+  /*#bar .dot{
+    display:inline-block;
+    width:8px;height:8px;
+    border-radius:50%;
+    background:#ff2d2d;
+    margin-right:8px;
+    vertical-align:middle;
+    animation:blink 1s steps(1) infinite;
+  }*/
+  @keyframes blink{50%{opacity:0}}
+
+  /* 日志区 */
+  #log{
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding:10px 0;
+    scrollbar-width:none;
+  }
+  #log::-webkit-scrollbar{display:none}
+
+  .line{
+    white-space:pre-wrap;
+    word-break:break-all;
+    line-height:1.5;
+    margin:0;padding:0;
+    color:#00ff40;          /* 白色（约 70%） */
+    animation:lineIn .1s ease-out;
+  }
+  .line.red{color:#ff2d2d}  /* 红色（约 30%） */
+  .ts{color:#555;margin-right:8px}
+
+  @keyframes lineIn{
+    from{opacity:0;transform:translateY(4px)}
+    to{opacity:1;transform:none}
+  }
+
+  @media (max-width:640px){
+    body{font-size:12px}
+    #app{padding:8px 10px}
+    .line{line-height:1.4}
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="bar">
+    <span><span class="dot"></span>root@mainframe:/var/log/secure</span>
+    <span id="clock">--:--:--</span>
+  </div>
+
+  <div id="log"></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var logEl   = document.getElementById("log");
+  var clockEl = document.getElementById("clock");
+
+  var MAX_LINES  = 150;   // 最多保留行数
+  var TICK_MS    = 18;   // 每秒 10 条
+  var RED_RATE   = 0.30;  // 红色概率 30%
+  var probeTimer = null;
+
+  /* ---------------- 小工具 ---------------- */
+  function pad(n, w) {
+    n = String(n);
+    while (n.length < (w || 2)) n = "0" + n;
+    return n;
+  }
+  function rnd(a, b) {
+    return Math.floor(Math.random() * (b - a + 1)) + a;
+  }
+  function pick(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+  function hex(n) {
+    var s = "";
+    for (var i = 0; i < n; i++) {
+      s += "0123456789ABCDEF".charAt(Math.floor(Math.random() * 16));
+    }
+    return s;
+  }
+  function ip() {
+    return rnd(1,255) + "." + rnd(0,255) + "." + rnd(0,255) + "." + rnd(1,254);
+  }
+  function timeStr() {
+    var d = new Date();
+    return pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds()) +
+           "." + pad(d.getMilliseconds(), 3);
+  }
+
+  /* ---------------- 报错信息池（丰富版） ---------------- */
+  var MSGS = [
+
+    /* ===== 文件 / 路径报错 ===== */
+    function () { return 'open("/var/www/html/index.php"): Permission denied (EACCES)not ff -html  No such file or directory (ENOENT)'; },
+    function () { return 'stat("/etc/nginx/sites-enabled/default"): No such file or directory (ENOENT)'; },
+    function () { return "Cannot access '/opt/app/config/database.yml': No such file or directory"; },
+    function () { return "failed to load shared library 'libmysqlclient.so.21': cannot open shared object file 扎啤扎啤扎啤扎啤扎啤扎啤扎啤"; },
+    function () { return "mmap of '/data/vol01/blob_0x" + hex(6) + "' failed: Input/output error"; },
+    function () { return "readlink('/proc/self/exe') returned ENOENT"; },
+    function () { return "unable to open '/var/log/nginx/access.log': Too many open files"; },
+    function () { return "path traversal attempt blocked: \"../../../../etc/shadow\" from " + ip(); },
+    function () { return "chmod('/etc/passwd'): Operation not permitted (EPERM)"; },
+    function () { return "inotify_add_watch('/srv/app/src') failed: No space left on device"; },
+    function () { return "write('/var/lib/mysql/ibdata1') failed: Read-only file system"; },
+
+    /* ===== 文件找不到 ===== */
+    function () { return "File not found: /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1"; },
+    function () { return "ENOENT: no such file or directory, open '/srv/app/manifest.json'"; },
+    function () { return "Could not locate configuration file at /etc/app/app.conf ModuleNotFoundError: No module named 'requests"; },
+    function () { return "ModuleNotFoundError: No module named 'requests'"; },
+    function () { return "ls: cannot access '/var/lib/app/data': No such file or directory"; },
+    function () { return "require('/app/routes/api.js'): Cannot find module"; },
+    function () { return "docker: Error: No such file or directory: /var/run/docker.sock"; },
+
+    /* ===== HTTP / 服务器报错 ===== */
+    function () { return "[HTTP] 502 Bad Gateway - upstream 'php-fpm' at unix:/run/php/php-fpm.sock"; },
+    function () { return "[HTTP] 500 Internal Server Error - GET /api/v1/users (" + rnd(2,48) + "ms)"; },
+    function () { return "[HTTP] 503 Service Unavailable - upstream connect error"; },
+    function () { return "[HTTP] 504 Gateway Timeout - upstream timed out (110: Connection timed out)"; },
+    function () { return "upstream timed out while reading response header from upstream"; },
+    function () { return "connect() failed (111: Connection refused) while connecting to upstream 127.0.0.1:8080"; },
+    function () { return "worker process " + rnd(1000,99999) + " exited with code 139"; },
+    function () { return "Accepting connections on 0.0.0.0:80 failed: Address already in use connect() failed (111: Connection refused) while connecting to upstream 127.0.0.1:8080"; },
+    function () { return "[HTTP] 413 Request Entity Too Large - POST /upload (" + rnd(1,999) + "MB)"; },
+    function () { return "[HTTP] 401 Unauthorized - missing bearer token from " + ip(); },
+    function () { return "[HTTP] 429 Too Many Requests - rate limit exceeded for " + ip(); },
+    function () { return "[HTTP] 400 Bad Request - malformed header from " + ip(); },
+
+    /* ===== 数据库报错 ===== */
+    function () { return "SQLSTATE[HY000] [2002] Connection refused (mysql:3306)"; },
+    function () { return "MySQL server has gone away (error 2006)"; },
+    function () { return "Deadlock found when trying to get lock; try restarting transaction SQLSTATE[HY000] [2002] Connection refused (mysql:3306)"; },
+    function () { return "PostgreSQL: FATAL: password authentication failed for user \"app\""; },
+    function () { return "Redis: LOADING Redis is loading the dataset in memory"; },
+    function () { return "MongoServerError: connection " + rnd(1,999) + " to 10.0.0." + rnd(2,254) + ":27017 closed"; },
+    function () { return "SQLITE_CORRUPT: database disk image is malformed"; },
+
+    /* ===== 网络 / DNS / TLS ===== */
+    function () { return "connect to 10.0.0." + rnd(2,254) + ":" + pick([6379,5432,9200,3306]) + ": Connection refused"; },
+    function () { return "DNS resolution failed for api.internal (NXDOMAIN)"; },
+    function () { return "TLS handshake failed: certificate verify failed (unable to get local issuer certificate)"; },
+    function () { return "TLS alert: bad certificate from " + ip() + ":443"; },
+    function () { return "socket error: ECONNRESET from " + ip() + ":" + rnd(1024,65535); },
+    function () { return "ping timeout after " + rnd(3,30) + "s to gateway 10.0.0.1"; },
+
+    /* ===== 系统 / 内核 / 权限 ===== */
+    function () { return "KERNEL PANIC - 0xC000021A"; },
+    function () { return "Out of memory: Killed process " + rnd(1000,99999) + " (" + pick(["node","java","sshd","nginx"]) + ")"; },
+    function () { return "EXT4-fs error (device sda1): ext4_lookup: deleted inode referenced"; },
+    function () { return "segfault at " + hex(12) + " ip 00007f" + hex(8) + " sp 00007ff" + hex(6) + " error 4 in libc-2.31.so"; },
+    function () { return "sudo: a password is required for user 'deploy'"; },
+    function () { return "Permission denied (publickey). fatal: Could not read from remote repository."; },
+    function () { return "audit: avc: denied { read } for pid=" + rnd(100,9999) + " comm=\"nginx\""; },
+    function () { return "SELinux: denied { execute } for path=\"/usr/bin/python3\""; },
+    function () { return "disk I/O error on /dev/sda1: status=0x51 { DriveReady SeekComplete Error }"; },
+    function () { return "systemd[1]: Failed to start Application Server. See 'systemctl status app.service'."; },
+
+    /* ===== 杂项探测 / 十六进制 ===== */
+    function () { return "probe #" + rnd(1000,99999) + " handshake from " + ip() + ":" + rnd(1024,65535); },
+    function () { return "symbol table resolved @ 0x" + hex(8); },
+    function () { return "thread " + rnd(100,9999) + " spawned priority " + rnd(1,32); },
+    function () { return "socket " + rnd(3,1023) + " bound 0.0.0.0:" + rnd(20,65000); },
+    function () { return "at 0x7f" + hex(8) + " in " + pick(["memcpy","strlen","ioctl","mmap","execve","free","schedule"]) + " ()"; },
+    function () { return "0x" + hex(8) + "  " + hex(4) + " " + hex(4) + " " + hex(4) + " " + hex(4) + "  |" + hex(8) + "|"; }
+  ];
+
+  /* ---------------- 输出一行（70% 白 / 30% 红） ---------------- */
+  function addLine(text) {
+    var div = document.createElement("div");
+    var isRed = Math.random() < RED_RATE;
+    div.className = "line" + (isRed ? " red" : "");
+
+    var ts = document.createElement("span");
+    ts.className = "ts";
+    ts.textContent = "[" + timeStr() + "]";
+
+    div.appendChild(ts);
+    div.appendChild(document.createTextNode(text));
+    logEl.appendChild(div);
+
+    while (logEl.childNodes.length > MAX_LINES) {
+      logEl.removeChild(logEl.firstChild);
+    }
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  /* ---------------- 每次探测（100ms 一次） ---------------- */
+  function probe() {
+    addLine(pick(MSGS)());
+  }
+
+  /* ---------------- 启动 ---------------- */
+  var bootLines = [
+    "[INFO ] secure shell session initializing...",
+    "[INFO ] loading module crypto/aes-x86_64 ... ok",
+    "[INFO ] mounting pseudo-filesystem /proc ... ok",
+    "[INFO ] audit daemon started (pid " + rnd(200, 900) + ")"
+  ];
+
+  var bi = 0;
+  (function boot() {
+    if (bi < bootLines.length) {
+      addLine(bootLines[bi]);
+      bi++;
+      setTimeout(boot, 200);
+    } else {
+      probeTimer = setInterval(probe, TICK_MS);
+    }
+  })();
+
+  /* ---------------- 时钟 ---------------- */
+  function tickClock() {
+    var d = new Date();
+    clockEl.textContent = pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  /* ---------------- 切后台暂停 / 回前台恢复 ---------------- */
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) {
+      clearInterval(probeTimer);
+      probeTimer = null;
+    } else {
+      if (!probeTimer) probeTimer = setInterval(probe, TICK_MS);
+    }
+  });
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>code-rain</title>
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+  }
+  #matrix {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;   /* 纯背景，不挡鼠标 */
+    display: block;
+  }
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+
+<script>
+(function () {
+  'use strict';
+
+  var canvas = document.getElementById('matrix');
+  var ctx = canvas.getContext('2d');
+
+  // ====== 可调参数 ======
+  var CHARS      = ['0', '1']; // 字符集
+  var FONT_SIZE  = 26;                       // 字号（同时是列宽 / 行高）
+  var ROW_H      = FONT_SIZE;                // 行高，字符垂直间距
+  var FADE       = 0.06;                     // 拖尾淡出：越小尾巴越长
+  var SPEED_MIN  = 1.0;                      // 最慢速度（像素/帧，60fps 基准）
+  var SPEED_MAX  = 4.5;                      // 最快速度
+  var COLOR      = '#00ff41';                // 代码雨颜色：绿色
+  var FONT       = FONT_SIZE + 'px "Courier New", Consolas, monospace';
+  // ======================
+
+  var width = 0, height = 0, columns = 0;
+  var drops   = [];   // 每列头部当前的 y 像素位置
+  var lastRow = [];   // 每列最后一次绘制的行号（关键：防止同位置重复绘制）
+  var speeds  = [];   // 每列速度
+  var lastTime = 0;
+  var running = true;
+
+  function randomChar() {
+    return CHARS[(Math.random() * CHARS.length) | 0];
+  }
+
+  function randomSpeed() {
+    return SPEED_MIN + Math.random() * (SPEED_MAX - SPEED_MIN);
+  }
+
+  function resize() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width  = window.innerWidth;
+    height = window.innerHeight;
+
+    canvas.width  = Math.round(width  * dpr);
+    canvas.height = Math.round(height * dpr);
+    canvas.style.width  = width  + 'px';
+    canvas.style.height = height + 'px';
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);  // 用 CSS 像素坐标绘制，高清屏自动适配
+
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, width, height);
+    ctx.font = FONT;
+    ctx.textBaseline = 'top';
+
+    columns = Math.ceil(width / FONT_SIZE);
+    drops   = new Array(columns);
+    lastRow = new Array(columns);
+    speeds  = new Array(columns);
+
+    for (var i = 0; i < columns; i++) {
+      var y = Math.random() * height;                 // 初始随机撒满屏幕
+      drops[i]   = y;
+      lastRow[i] = Math.floor(y / ROW_H) - 1;         // 保证第一帧就能落笔
+      speeds[i]  = randomSpeed();
+    }
+  }
+
+  function frame(now) {
+    if (!running) return;
+
+    if (!lastTime) lastTime = now;
+    var dt = (now - lastTime) / 16.6667;   // 归一化到 60fps，不同刷新率速度一致
+    lastTime = now;
+    if (dt > 4) dt = 4;                    // 切标签页回来时不跳帧
+
+    // 半透明黑覆盖 -> 形成拖尾
+    ctx.fillStyle = 'rgba(0, 0, 0,' + FADE + ')';
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.font = FONT;
+    ctx.fillStyle = COLOR;
+
+    for (var i = 0; i < columns; i++) {
+      var x = i * FONT_SIZE;
+
+      drops[i] += speeds[i] * dt;
+
+      var row = Math.floor(drops[i] / ROW_H);
+
+      /* ★ 核心修复 ★
+         只有「跨入新的一行」才落笔。
+         同一列每个字符都严格落在整数行的格点上，
+         两次绘制至少相隔 ROW_H 像素，从根上杜绝字符重叠。 */
+      if (row > lastRow[i]) {
+        lastRow[i] = row;
+        var py = row * ROW_H;
+        if (py > -ROW_H && py < height) {
+          ctx.fillText(randomChar(), x, py);
+        }
+      }
+
+      // 落到底部后随机延时重生
+      if (drops[i] > height + Math.random() * 400) {
+        drops[i]   = -ROW_H * (1 + Math.random() * 8);
+        lastRow[i] = Math.floor(drops[i] / ROW_H) - 1;
+        speeds[i]  = randomSpeed();
+      }
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  // 窗口尺寸变化（防抖）
+  var resizeTimer;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resize, 120);
+  });
+
+  // 页面不可见时暂停，省电
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+      running = false;
+    } else if (!running) {
+      running = true;
+      lastTime = 0;
+      requestAnimationFrame(frame);
+    }
+  });
+
+  resize();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
